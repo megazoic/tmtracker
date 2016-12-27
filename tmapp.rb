@@ -10,11 +10,7 @@ logger.level = Logger::DEBUG
 class HelloWorldApp < Sinatra::Base
   get '/:stop/:key' do
     uAIFarray = Array.new
-<<<<<<< HEAD
     urlAppIdFile = File.open("config/credentials.txt")
-=======
-    urlAppIdFile = File.open("testMisc.txt")
->>>>>>> 58917dc7ab5a283d4fb92ab031c9a03ec8e65fa7
     urlAppIdFile.each_line do |line|
       uAIFarray << line.chomp
     end
