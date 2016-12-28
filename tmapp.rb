@@ -76,7 +76,7 @@ class HelloWorldApp < Sinatra::Base
         logger.debug("Can't sort hash:\n#{returnHash(route)}\nError:\n#{err}")
       end
     }
-    [200, {'Content-Type' => 'text/html', 'Connection' => 'close'}, "#{returnHash}"]
+    [200, {'Content-Type' => 'text/html', 'Connection' => 'close'}, "#{returnHash.to_json}"]
   end
   get '/' do
     halt 403
