@@ -49,6 +49,8 @@ class HelloWorldApp < Sinatra::Base
     routes.each{|route|
       returnHash[route] = []
     }
+    #add time to the hash
+    returnHash["Time"] = currentTime.strftime("%H:%M")
     #build hash with route and arrival times
     (0..records-1).each{|n|
       errorStatus = ''
