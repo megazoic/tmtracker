@@ -21,11 +21,12 @@ class HelloWorldApp < Sinatra::Base
     # get data
     outString = ''
     begin
-      url = URI("https://#{uAIFarray[0]}/ws/v2/arrivals?locIDs=#{params['stop']}&json=true&minutes=30&appID=#{uAIFarray[1]}")
+      url = URI("https://#{uAIFarray[0]}/ws/v2/arrivals?locIDs=#{params['stop']}&json=true&minutes=40&appID=#{uAIFarray[1]}")
       response = Net::HTTP.get_response(url)
     rescue
       halt 503, "API not responding"
       #log error here
+      logger.debug("503 error\n")
     end
     if response.code == "200"
       outString = response.body
@@ -33,6 +34,7 @@ class HelloWorldApp < Sinatra::Base
       #log error here
       #send notice
       halt 502, "API responded incorrectly"
+      logger.debug("502 error\n")
     end
       
     tmData = JSON.parse(outString)
@@ -50,33 +52,49 @@ class HelloWorldApp < Sinatra::Base
       returnHash[route] = []
     }
     #add time to the hash
-    returnHash["Time"] = currentTime.strftime("%H:%M")
+    returnHash["Time"] = currentTime.strftime("%H%M")
     #build hash with route and arrival times
     (0..records-1).each{|n|
-      errorStatus = ''
-      arriveTime = ''
+      errorStatus = 0
+      arriveTime = 0
       route = tmData["resultSet"]["arrival"][n]["route"].to_s
       if (tmData["resultSet"]["arrival"][n].has_key?("trackingError"))
         nextTime = Time.at(tmData["resultSet"]["arrival"][n]["scheduled"].to_s[0..9].to_i)
-        errorStatus = "1"
+        errorStatus = 1
       else
         nextTime = Time.at((tmData["resultSet"]["arrival"][n]["estimated"].to_s[0..9]).to_i)
-        errorStatus = "0"
+        errorStatus = 0
       end
-      arriveTime = ((nextTime - currentTime)/60).to_i.to_s
-      returnHash[route] << "#{errorStatus},#{arriveTime}"
+      arriveTime = ((nextTime - currentTime)/60).to_i
+      #returnHash[route] << "#{errorStatus},#{arriveTime}"
+      returnHash[route] << [errorStatus,arriveTime]
     }
     #get in ascending order of time from now and keep closest two entries
-    re = /,([0-9]+)/
+    #re = /,([0-9]+)/
+    hashOut = Hash.new
     routes.each{|route|
       begin
-        returnHash[route].sort_by! {|arrival| re.match(arrival)[1].to_i}
-        returnHash[route] = returnHash[route][0..1]
+        #these don't work now that value of hash is in 2D array
+        #returnHash[route].sort_by! {|arrival| re.match(arrival)[1]}
+        #returnHash[route] = returnHash[route][0..1]
+        hashOut[route] = returnHash[route][0..1]
       rescue => err
-        logger.debug("Can't sort hash:\n#{returnHash(route)}\nError:\n#{err}")
+        logger.debug("Can't sort hash:\n#{returnHash[route]}\nError:\n#{err}\n")
       end
     }
-    [200, {'Content-Type' => 'text/html', 'Connection' => 'close'}, "#{returnHash.to_json}"]
+    hashOut["Time"] = returnHash["Time"]
+    responseString = hashOut.to_json
+    [200, {'Content-Type' => 'application/json', 'Connection' => 'close'}, "#{responseString}"]
+  end
+  get '/noArray' do
+    response = "{\"75Ea\": 0,\"75a\": 8,\"75Eb\": 0,\"75b\": 23,\"Time\": \"1935\"}"
+    [200, {'Content-Type' => 'application/json', 'Connection' => 'close'}, "#{response}"]
+  end
+  get '/test' do
+    testHash = Hash.new
+    testHash["75"] = [0,10]
+    testHash["Time"] = "0932"
+    [200, {'Content-Type' => 'application/json', 'Connection' => 'close'}, "#{testHash.to_json}"]
   end
   get '/' do
     halt 403

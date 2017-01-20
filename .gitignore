@@ -5,3 +5,4 @@ testTime.rb
 testMisc*.*
 tracker.log
 credentials.txt
+jsmn_parser_Example.c
