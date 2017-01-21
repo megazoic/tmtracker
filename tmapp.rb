@@ -2,10 +2,10 @@
 require 'sinatra'
 require 'json'
 require 'net/http'
-require 'logger'
+#require 'logger'
 
-logger = Logger.new('tmtracker.log', 10, 1024000)
-logger.level = Logger::DEBUG
+#logger = Logger.new('tmtracker.log', 10, 1024000)
+#logger.level = Logger::DEBUG
 
 class HelloWorldApp < Sinatra::Base
   get '/:stop/:key' do
@@ -26,7 +26,7 @@ class HelloWorldApp < Sinatra::Base
     rescue
       halt 503, "API not responding"
       #log error here
-      logger.debug("503 error\n")
+      #logger.debug("503 error\n")
     end
     if response.code == "200"
       outString = response.body
@@ -34,7 +34,7 @@ class HelloWorldApp < Sinatra::Base
       #log error here
       #send notice
       halt 502, "API responded incorrectly"
-      logger.debug("502 error\n")
+      #logger.debug("502 error\n")
     end
       
     tmData = JSON.parse(outString)
@@ -79,7 +79,7 @@ class HelloWorldApp < Sinatra::Base
         #returnHash[route] = returnHash[route][0..1]
         hashOut[route] = returnHash[route][0..1]
       rescue => err
-        logger.debug("Can't sort hash:\n#{returnHash[route]}\nError:\n#{err}\n")
+        #logger.debug("Can't sort hash:\n#{returnHash[route]}\nError:\n#{err}\n")
       end
     }
     hashOut["Time"] = returnHash["Time"]
