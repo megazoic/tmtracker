@@ -9,8 +9,8 @@ require 'net/http'
 
 class HelloWorldApp < Sinatra::Base
   # :type is 'A' Arrivals, 'P' position. For now only interested in arrivals so no test of symbol
-  get ':type/:stop/:key' do
-    if :type == 'A' then
+  get '/:type/:stop/:key' do
+    if params['type'] == 'A' then
       uAIFarray = Array.new
       urlAppIdFile = File.open("config/credentials.txt")
       urlAppIdFile.each_line do |line|
