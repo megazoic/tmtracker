@@ -72,14 +72,20 @@ class HelloWorldApp < Sinatra::Base
         returnHash[route] << [errorStatus,arriveTime]
       }
       #get in ascending order of time from now and keep closest two entries
+      #that are > 5 min away
       #re = /,([0-9]+)/
       hashOut = Hash.new
       routes.each{|route|
         begin
-          #these don't work now that value of hash is in 2D array
-          #returnHash[route].sort_by! {|arrival| re.match(arrival)[1]}
-          #returnHash[route] = returnHash[route][0..1]
-          hashOut[route] = returnHash[route][0..1]
+          outArray = []
+          count = 0
+          returnHash[route].each{|bus|
+            if (bus[1] > 5 && count < 2) then
+              outArray << bus
+              count = count + 1
+            end
+          }
+          hashOut[route] = outArray
         rescue => err
           #logger.debug("Can't sort hash:\n#{returnHash[route]}\nError:\n#{err}\n")
         end
